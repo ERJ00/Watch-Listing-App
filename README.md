@@ -1,5 +1,7 @@
 # Watch Listing App  
 
+The **Watch Listing App** is my first app, developed to practice and enhance my skills in web app development. This app is a simple and efficient tool for organizing movies and series. Users can manually create a personalized list with details like **title**, **season**, **episode**, and **status** (finished or unfinished). The app prioritizes offline functionality, storing data locally after login, while leveraging Firebase for user account management and cloud-based data syncing.  
+
 ## User Interface
 
 <div style="margin-top: 20px;">
@@ -10,20 +12,16 @@
 </div>
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-  <img src="UI/image1.png" alt="Image 1" width="150" />
-  <img src="UI/image2.png" alt="Image 2" width="150" />
-  <img src="UI/image3.png" alt="Image 3" width="150" />
-  <img src="UI/image4.png" alt="Image 4" width="150" />
-  <img src="UI/image5.png" alt="Image 5" width="150" />
-  <img src="UI/image6.png" alt="Image 6" width="150" />
-  <img src="UI/image7.png" alt="Image 7" width="150" />
-  <img src="UI/image8.png" alt="Image 8" width="150" />
-  <img src="UI/image9.png" alt="Image 9" width="150" />
+  <img src="UI/image 1.jpg" alt="Image 1" width="150" />
+  <img src="UI/image 2.jpg" alt="Image 2" width="150" />
+  <img src="UI/image 3.jpg" alt="Image 3" width="150" />
+  <img src="UI/image 4.jpg" alt="Image 4" width="150" />
+  <img src="UI/image 5.jpg" alt="Image 5" width="150" />
+  <img src="UI/image 6.jpg" alt="Image 6" width="150" />
+  <img src="UI/image 7.jpg" alt="Image 7" width="150" />
+  <img src="UI/image 8.jpg" alt="Image 8" width="150" />
+  <img src="UI/image 9.jpg" alt="Image 9" width="150" />
 </div>
-
----
-
-The **Watch Listing App** is my first app, developed to practice and enhance my skills in web app development. This app is a simple and efficient tool for organizing movies and series. Users can manually create a personalized list with details like **title**, **season**, **episode**, and **status** (finished or unfinished). The app prioritizes offline functionality, storing data locally after login, while leveraging Firebase for user account management and cloud-based data syncing.  
 
 ## Features  
 
