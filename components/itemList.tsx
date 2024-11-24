@@ -44,6 +44,14 @@ export function ItemList({
         <Text style={styles.label}>
           EPISODE: <Text style={styles.text}>{episode}</Text>
         </Text>
+        {!removeCheckboxVisible && !editItemVisible && (
+          <View
+            style={[
+              styles.statusIndicator,
+              { backgroundColor: status ? "#32CD32" : "#ff0000" },
+            ]}
+          ></View>
+        )}
         {removeCheckboxVisible && (
           <Pressable
             role="checkbox"
@@ -94,6 +102,7 @@ const styles = StyleSheet.create({
   text: {
     color: "#ffd",
     fontSize: 14,
+    alignSelf: "center",
   },
 
   checkboxBase: {
@@ -125,5 +134,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
+  },
+
+  statusIndicator: {
+    width: 10,
+    height: 10,
+    backgroundColor: "#fff",
+    borderRadius: "100%",
+    alignSelf: "center",
   },
 });

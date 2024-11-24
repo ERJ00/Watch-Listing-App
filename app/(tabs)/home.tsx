@@ -39,7 +39,10 @@ export default function Home() {
   const loadData = useCallback(async () => {
     const storedData = await storageUtils.getAllItems();
     if (storedData) {
-      setData(storedData);
+      const sortedData = storedData.sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+      setData(sortedData);
       setReloadData(false);
     }
   }, []);
@@ -150,7 +153,7 @@ export default function Home() {
               />
             ))
           ) : (
-            <Text>No items available</Text>
+            <Text style={styles.noItemListed}>No items available</Text>
           )}
         </ScrollView>
       </Background>
@@ -192,5 +195,18 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
     padding: 10,
+  },
+  noItemListed: {
+    color: "#e0baba",
+    fontWeight: "bold",
+    fontSize: 30,
+    textAlign: "center",
+    backgroundColor: "#000",
+    borderWidth: 1,
+    borderColor: "#ff0000",
+    borderRadius: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
+    marginTop: 20,
   },
 });

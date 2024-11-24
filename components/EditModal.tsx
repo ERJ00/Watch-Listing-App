@@ -24,10 +24,16 @@ export function EditModal({ visible, item, onClose, reload }) {
   const [isDoneSaving, setIsDoneSaving] = useState(false);
   const [closeNow, setCloseNow] = useState(false);
 
+  useEffect(() => {
+    if (visible && item) {
+      setItemStatus(item.status);
+    }
+  }, [visible]);
   const handleClose = () => {
     setItemTitle("");
     setItemSeason("");
     setItemEpisode("");
+    setItemStatus(false);
     setIsDoneSaving(false);
     setCloseNow(false);
     reload();
