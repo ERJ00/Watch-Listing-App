@@ -62,6 +62,20 @@ export function Header({
                 onPress={() => onItemPress(item)}
               >
                 <Text style={styles.dropdownText}>{item.title}</Text>
+                <View
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "space-evenly",
+                  }}
+                >
+                  <Text style={styles.dropdownSubText}>
+                    Season: {item.season}
+                  </Text>
+                  <Text style={styles.dropdownSubText}>
+                    Episode: {item.episode}
+                  </Text>
+                </View>
               </TouchableOpacity>
             )}
             ListEmptyComponent={
@@ -92,8 +106,8 @@ const styles = StyleSheet.create({
   dropdown: {
     position: "absolute",
     top: 60, // Adjust to match the position of your search bar
-    left: 10,
-    right: 10,
+    left: 9,
+    right: 9,
     backgroundColor: "#000",
     borderRadius: 8,
     borderWidth: 0.5,
@@ -106,10 +120,17 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 0.5,
     borderColor: "#ffd",
+    width: "100%",
   },
 
   dropdownText: {
     color: "#ffd",
+    width: "100%",
+  },
+
+  dropdownSubText: {
+    color: "#8a8a78",
+    fontSize: 13,
   },
 
   emptyContainer: {

@@ -1,11 +1,17 @@
 // @ts-nocheck
 import {
+  Alert,
+  Button,
+  Image,
   Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
+import * as Clipboard from "expo-clipboard";
+import Toast from "react-native-toast-message";
 
 export function ItemList({
   item,
@@ -19,6 +25,15 @@ export function ItemList({
 }) {
   const { title, episode, season, status } = item;
 
+  const copyToClipboard = async () => {
+    await Clipboard.setStringAsync(title);
+    Toast.show({
+      type: "success",
+      text1: "Title Copied!",
+      text2: `Title: ${title}`,
+    });
+  };
+
   return (
     <View
       style={[
@@ -26,9 +41,21 @@ export function ItemList({
         { backgroundColor: checked ? "#870505" : "#000" },
       ]}
     >
-      <Text style={styles.label}>
-        TITLE: <Text style={styles.text}>{title}</Text>
-      </Text>
+      <View style={{ width: "100%", flexDirection: "row" }}>
+        <View style={{ width: "93%" }}>
+          <Text style={styles.label}>
+            TITLE: <Text style={styles.text}>{title}</Text>
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.copyBTN} onPress={copyToClipboard}>
+          <Image
+            style={styles.copyBTNImage}
+            source={require("../assets/icons/copy.png")}
+          />
+        </TouchableOpacity>
+      </View>
+
       <View
         style={{
           flexDirection: "row",
@@ -142,5 +169,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: "100%",
     alignSelf: "center",
+  },
+
+  copyBTN: {
+    width: "5%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  copyBTNImage: {
+    width: 24,
+    height: 24,
+    flex: 1,
+    resizeMode: "contain",
+    tintColor: "#ffd",
   },
 });

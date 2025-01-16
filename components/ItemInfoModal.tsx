@@ -1,7 +1,16 @@
 //@ts-nocheck
 import { useState } from "react";
-import { Modal, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import {
+  Modal,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  Image,
+} from "react-native";
 import { EditModal } from "./EditModal";
+
+import * as Clipboard from "expo-clipboard";
 
 export function ItemInfoModal({
   visible,
@@ -14,6 +23,10 @@ export function ItemInfoModal({
     setEditModalVisible(true);
   };
 
+  const copyToClipboard = async () => {
+    await Clipboard.setStringAsync(selectedItem?.title);
+  };
+
   return (
     <Modal
       visible={visible}
@@ -23,9 +36,20 @@ export function ItemInfoModal({
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.label}>
-            Title: <Text style={styles.text}>{selectedItem?.title}</Text>
-          </Text>
+          <View style={{ width: "100%", flexDirection: "row" }}>
+            <View style={{ width: "93%" }}>
+              <Text style={styles.label}>
+                Title: <Text style={styles.text}>{selectedItem?.title}</Text>
+              </Text>
+            </View>
+            <TouchableOpacity style={styles.copyBTN} onPress={copyToClipboard}>
+              <Image
+                style={styles.copyBTNImage}
+                source={require("../assets/icons/copy.png")}
+              />
+            </TouchableOpacity>
+          </View>
+
           <Text style={styles.label}>
             Season: <Text style={styles.text}>{selectedItem?.season}</Text>
           </Text>
@@ -125,5 +149,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     fontWeight: "bold",
+  },
+
+  copyBTN: {
+    width: "5%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  copyBTNImage: {
+    width: 24,
+    height: 24,
+    flex: 1,
+    resizeMode: "contain",
+    tintColor: "#ffd",
   },
 });
