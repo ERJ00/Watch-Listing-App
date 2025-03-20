@@ -5,11 +5,12 @@ import { RemoveBtnCancel } from "./RemoveBtnCancel";
 import { ConfirmActionModal } from "./ConfirmActionModal";
 import { useState } from "react";
 
-export function RemoverStatus({
-  setRemoveCheckboxVisible,
-  setDeleteAction,
-  totalItemsDeleted,
-}) {
+import { useAppContext } from "@/utils/AppContext";
+
+export function RemoverStatus({ setDeleteAction, totalItemsDeleted }) {
+  // context
+  const { setRemoveCheckboxVisible } = useAppContext();
+
   const [confirmationModalVisible, setConfirmationModalVisible] =
     useState(false);
   const confirmationModalMessage =
@@ -37,7 +38,7 @@ export function RemoverStatus({
       </Text>
       <View style={styles.btnContainer}>
         <RemoveBtnAccept onConfirmationAction={handleAcceptDelete} />
-        <RemoveBtnCancel setRemoveCheckboxVisible={setRemoveCheckboxVisible} />
+        <RemoveBtnCancel />
       </View>
       <ConfirmActionModal
         visible={confirmationModalVisible}
@@ -63,7 +64,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 25,
   },
 
   label: {

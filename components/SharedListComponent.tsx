@@ -1,6 +1,12 @@
 //@ts-nocheck
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, SafeAreaView, ScrollView, Text } from "react-native";
+import {
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  FlatList,
+} from "react-native";
 import { useFocusEffect } from "expo-router";
 
 import { Background } from "@/components/Background";
@@ -17,14 +23,12 @@ import { toastConfig } from "../hooks/toastConfig";
 
 import storageUtils from "@/utils/storageUtils";
 
+import { useAppContext } from "@/utils/AppContext";
+
 export const SharedListComponent = ({ filterFn }) => {
   const [data, setData] = useState([]);
-  const [reloadData, setReloadData] = useState(false);
-  const [isAddModalVisible, setAddModalVisible] = useState(false);
-  const [editItemVisible, setEditItemVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editItem, setEditItem] = useState(null);
-  const [removeCheckboxVisible, setRemoveCheckboxVisible] = useState(false);
   const [deleteAction, setDeleteAction] = useState(false);
   const [checkedItems, setCheckedItems] = useState([]);
   const [alertVisible, setAlertVisible] = useState(false);
@@ -32,9 +36,19 @@ export const SharedListComponent = ({ filterFn }) => {
   const [totalItemsDeleted, setTotalItemsDeleted] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Context data
+  const {
+    reloadData,
+    setReloadData,
+    removeCheckboxVisible,
+    setRemoveCheckboxVisible,
+    setEditMode,
+    infoModalVisible,
+    setInfoModalVisible,
+    selectedItem,
+  } = useAppContext();
 
   // Load data from local storage
   const loadData = useCallback(async () => {
@@ -59,7 +73,7 @@ export const SharedListComponent = ({ filterFn }) => {
     useCallback(() => {
       setLoading(true);
       loadData();
-      setEditItemVisible(false);
+      setEditMode(false);
       setRemoveCheckboxVisible(false);
       setSearchQuery("");
       setLoading(false);
@@ -113,78 +127,62 @@ export const SharedListComponent = ({ filterFn }) => {
     }
   }, [searchQuery, data]);
 
-  const handleItemPress = (item) => {
-    setSelectedItem(item);
-    setInfoModalVisible(true);
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <Background>
         {removeCheckboxVisible ? (
           <RemoverStatus
-            setRemoveCheckboxVisible={setRemoveCheckboxVisible}
             setDeleteAction={setDeleteAction}
             totalItemsDeleted={totalItemsDeleted}
           />
         ) : (
           <Header
-            setAddModalVisible={setAddModalVisible}
-            setRemoveCheckboxVisible={setRemoveCheckboxVisible}
-            setEditItemVisible={setEditItemVisible}
-            editItemVisible={editItemVisible}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             searchResults={searchResults}
-            onItemPress={handleItemPress}
-            reload={setReloadData}
           />
         )}
-        <ScrollView style={styles.listContainer}>
-          {data.length > 0 ? (
-            data.map((item) => (
-              <ItemList
-                key={item.id}
-                item={item}
-                checked={checkedItems.includes(item.id)}
-                removeCheckboxVisible={removeCheckboxVisible}
-                handleCheckboxPress={() => handleCheckboxPress(item.id)}
-                editItemVisible={editItemVisible}
-                setEditItem={setEditItem}
-                setEditModalVisible={setEditModalVisible}
-              />
-            ))
-          ) : (
-            <Text style={styles.noItemListed}>No items available</Text>
+        <FlatList
+          style={styles.listContainer}
+          data={data}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <ItemList
+              item={item}
+              checked={checkedItems.includes(item.id)}
+              handleCheckboxPress={() => handleCheckboxPress(item.id)}
+              setEditItem={setEditItem}
+              setEditModalVisible={setEditModalVisible}
+            />
           )}
-        </ScrollView>
+          initialNumToRender={10} // Render 10 items first
+          windowSize={5} // Efficiently handle large lists
+          ListEmptyComponent={
+            <Text style={styles.noItemListed}>No items available</Text>
+          }
+        />
       </Background>
-      <AddNewModal
-        visible={isAddModalVisible}
-        onClose={() => {
-          setAddModalVisible(false);
-          setReloadData(true);
-        }}
-      />
+      <AddNewModal />
       <EditModal
         visible={editModalVisible}
         onClose={() => setEditModalVisible(false)}
         item={editItem}
-        reload={() => setReloadData(true)}
       />
       <CustomAlert
         visible={alertVisible}
         onClose={() => setAlertVisible(false)}
         message={alertMessage}
       />
-      <ItemInfoModal
-        visible={infoModalVisible}
-        transparent
-        animationType="slide"
-        selectedItem={selectedItem}
-        onRequestClose={() => setInfoModalVisible(false)}
-        reload={() => setReloadData(true)}
-      />
+      {infoModalVisible && (
+        <ItemInfoModal
+          visible={infoModalVisible}
+          transparent
+          animationType="slide"
+          selectedItem={selectedItem}
+          onRequestClose={() => setInfoModalVisible(false)}
+          reload={() => setReloadData(true)}
+        />
+      )}
       <LoadingModal visible={loading} />
       <Toast config={toastConfig} />
     </SafeAreaView>

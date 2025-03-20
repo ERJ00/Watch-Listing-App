@@ -13,7 +13,9 @@ import {
 import storageUtils from "@/utils/storageUtils";
 import { CustomAlert } from "./CustomAlert";
 
-export function EditModal({ visible, item, onClose, reload }) {
+import { useAppContext } from "@/utils/AppContext";
+
+export function EditModal({ visible, item, onClose }) {
   const [itemTitle, setItemTitle] = useState("");
   const [itemSeason, setItemSeason] = useState("");
   const [itemEpisode, setItemEpisode] = useState("");
@@ -21,30 +23,27 @@ export function EditModal({ visible, item, onClose, reload }) {
 
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [isDoneSaving, setIsDoneSaving] = useState(false);
-  const [closeNow, setCloseNow] = useState(false);
+
+  const { setReloadData } = useAppContext();
 
   useEffect(() => {
     if (visible && item) {
       setItemStatus(item.status);
     }
   }, [visible]);
+
   const handleClose = () => {
+    resetInputs();
+    onClose();
+  };
+
+  const resetInputs = () => {
     setItemTitle("");
     setItemSeason("");
     setItemEpisode("");
     setItemStatus(false);
-    setIsDoneSaving(false);
-    setCloseNow(false);
-    reload();
-    onClose();
+    setAlertVisible(false);
   };
-
-  useEffect(() => {
-    if (closeNow) {
-      handleClose();
-    }
-  }, [closeNow]);
 
   const handleSave = async () => {
     if (isNaN(itemSeason) || isNaN(itemEpisode)) {
@@ -69,10 +68,11 @@ export function EditModal({ visible, item, onClose, reload }) {
         status: itemStatus ?? item.status,
       };
       await storageUtils.updateItem(updatedItem);
+      // setAlertMessage("Data updated successfully.");
+      // setAlertVisible(true);
     }
-    setAlertMessage("Data updated successfully.");
-    setAlertVisible(true);
-    setIsDoneSaving(true);
+    setReloadData(true);
+    handleClose();
   };
 
   return (
@@ -161,9 +161,6 @@ export function EditModal({ visible, item, onClose, reload }) {
         visible={alertVisible}
         onClose={() => {
           setAlertVisible(false);
-          if (isDoneSaving) {
-            setCloseNow(true);
-          }
         }}
         message={alertMessage}
       />

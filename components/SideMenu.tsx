@@ -2,12 +2,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
-  Pressable,
   StyleSheet,
   Text,
   Animated,
   Easing,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import { DataStatistic } from "./DataStatistic";
 import storageUtils from "@/utils/storageUtils";
@@ -22,19 +22,23 @@ import {
   doc,
   getDoc,
   getDocs,
+  writeBatch,
 } from "firebase/firestore";
 import { FIRESTORE, FIREBASEAUTH } from "@/FirebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { ConfirmActionModal } from "./ConfirmActionModal";
 
-export function SideMenu({
-  modalVisible,
-  setModalVisible,
-  setAddModalVisible,
-  setRemoveCheckboxVisible,
-  setEditItemVisible,
-  reload,
-}) {
+import { useAppContext } from "@/utils/AppContext";
+
+export function SideMenu({ modalVisible, setModalVisible }) {
+  // Context data
+  const {
+    setReloadData,
+    setRemoveCheckboxVisible,
+    setAddModalVisible,
+    setEditMode,
+  } = useAppContext();
+
   const slideAnim = useRef(new Animated.Value(300)).current;
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -65,9 +69,9 @@ export function SideMenu({
       setEmail(email);
       setPassword(password);
     } else {
-      setUsername('Guest User');
-      setEmail('email@example.com');
-      setPassword('password');
+      setUsername("Guest User");
+      setEmail("email@example.com");
+      setPassword("password");
     }
   };
   validateSession();
@@ -95,19 +99,21 @@ export function SideMenu({
   const saveDataToFirestore = async () => {
     setLoadingMessage("Saving data...");
     setLoading(true);
+
     try {
+      // 1. Check Internet Connection
       const netInfo = await NetInfo.fetch();
       if (!netInfo.isConnected) {
         setLoading(false);
         setAlertMessage(
-          "No internet connection. Please check your internet connection."
+          "No internet connection. Please check your connection."
         );
         setAlertVisible(true);
         return;
       }
 
+      // 2. Get Data to Save
       const itemList = await storageUtils.getAllItems();
-
       if (!itemList || itemList.length === 0) {
         setLoading(false);
         setAlertMessage("No items will be saved.");
@@ -115,36 +121,41 @@ export function SideMenu({
         return;
       }
 
-      await signInWithEmailAndPassword(FIREBASEAUTH, email, password);
+      // 3. Ensure User is Authenticated
+      if (!FIREBASEAUTH.currentUser) {
+        await signInWithEmailAndPassword(FIREBASEAUTH, email, password);
+      }
 
+      // 4. Get References
       const usernameDocRef = doc(FIRESTORE, "users", username);
       const itemListRef = collection(usernameDocRef, "itemLists");
 
+      // 5. Delete Existing Documents Using Batch Writes
+      const batch = writeBatch(FIRESTORE);
       const itemListSnapshot = await getDocs(itemListRef);
-      const deletePromises = itemListSnapshot.docs.map((doc) =>
-        deleteDoc(doc.ref)
-      );
-      await Promise.all(deletePromises);
+      itemListSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
 
-      const savePromises = itemList.map((item) =>
-        addDoc(itemListRef, {
+      // 6. Add New Items Using Batch Writes
+      itemList.forEach((item) => {
+        const newDocRef = doc(itemListRef); // Creates a new document with a unique ID
+        batch.set(newDocRef, {
           id: item.id,
           title: item.title,
           status: item.status,
           episode: item.episode,
           season: item.season,
-        })
-      );
-      await Promise.all(savePromises);
+        });
+      });
+
+      // 7. Commit Batch Operation (All Deletes + Writes in One Go)
+      await batch.commit();
 
       setLoading(false);
       setAlertMessage("Successfully Saved All Data.");
       setAlertVisible(true);
-      return;
     } catch (error) {
-      const errorMessage = `Something went wrong! ${error.message}`;
       setLoading(false);
-      setAlertMessage(errorMessage);
+      setAlertMessage(`Something went wrong! ${error.message}`);
       setAlertVisible(true);
     }
   };
@@ -201,39 +212,44 @@ export function SideMenu({
     setLoadingMessage("Retrieving data...");
     setLoading(true);
 
-    const netInfo = await NetInfo.fetch();
-    if (!netInfo.isConnected) {
-      setLoading(false);
-      setAlertMessage(
-        "No internet connection. Please check your internet connection."
-      );
-      setAlertVisible(true);
-      return;
-    }
-
     try {
+      // 1. Check Internet Connection
+      const netInfo = await NetInfo.fetch();
+      if (!netInfo.isConnected) {
+        setLoading(false);
+        setAlertMessage("No internet connection. Please check your internet.");
+        setAlertVisible(true);
+        return;
+      }
+
+      // 2. Authenticate First (Avoid Unnecessary Calls)
+      if (!FIREBASEAUTH.currentUser) {
+        await signInWithEmailAndPassword(FIREBASEAUTH, email, password);
+      }
+
+      // 3. Firestore References
       const usernameDocRef = doc(FIRESTORE, "users", username);
-      const usernameDoc = await getDoc(usernameDocRef);
-
-      await signInWithEmailAndPassword(FIREBASEAUTH, email, password);
-
-      await storageUtils.resetData();
-
       const itemListRef = collection(usernameDocRef, "itemLists");
-      const itemListSnapshot = await getDocs(itemListRef);
+
+      // 4. Fetch All Data in Parallel
+      const [itemListSnapshot] = await Promise.all([getDocs(itemListRef)]);
+
+      // 5. Process Retrieved Data
       const itemListData = itemListSnapshot.docs.map((doc) => doc.data());
 
-      await storageUtils.saveData(itemListData);
+      if (itemListData.length > 0) {
+        await storageUtils.resetData(); // Reset only if new data exists
+        await storageUtils.saveData(itemListData);
+      }
 
+      // 6. Update UI
       setLoading(false);
-      reload(true);
+      setReloadData(true);
       setAlertMessage("Reload Data Successfully.");
       setAlertVisible(true);
     } catch (error) {
-      const errorMessage = `Something went wrong! ${error.message}`;
-      setAlertMessage(errorMessage);
+      setAlertMessage(`Something went wrong! ${error.message}`);
       setAlertVisible(true);
-      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -246,14 +262,17 @@ export function SideMenu({
       animationType="none"
       onRequestClose={() => setModalVisible(false)}
     >
-      <Pressable onPress={() => setModalVisible(false)} style={styles.overlay}>
+      <TouchableOpacity
+        onPress={() => setModalVisible(false)}
+        style={styles.overlay}
+      >
         <Animated.View
           style={[
             styles.modalContainer,
             { transform: [{ translateX: slideAnim }] },
           ]}
         >
-          <Pressable
+          <TouchableOpacity
             onPress={(e) => e.stopPropagation()}
             style={styles.modalContent}
           >
@@ -266,39 +285,39 @@ export function SideMenu({
               {username || "Guest UserName"}
             </Text>
             <DataStatistic />
-            <Pressable
+            <TouchableOpacity
               onPress={() => {
                 setModalVisible(false);
                 setAddModalVisible(true);
               }}
             >
               <Text style={styles.text}>Add New</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={() => {
                 setModalVisible(false);
-                setEditItemVisible(true);
+                setEditMode(true);
               }}
             >
               <Text style={styles.text}>Edit Item</Text>
-            </Pressable>
-            <Pressable
+            </TouchableOpacity>
+            <TouchableOpacity
               onPress={() => {
                 setModalVisible(false);
                 setRemoveCheckboxVisible(true);
               }}
             >
               <Text style={styles.text}>Remove</Text>
-            </Pressable>
-            <Pressable onPress={handleLoadData}>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLoadData}>
               <Text style={[styles.text, { color: "#FFA500" }]}>Load Data</Text>
-            </Pressable>
-            <Pressable onPress={handleSaveData}>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSaveData}>
               <Text style={[styles.text, { color: "#32CD32" }]}>Save Data</Text>
-            </Pressable>
-            <Pressable onPress={handleLogout}>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout}>
               <Text style={[styles.text, { color: "#FF0000" }]}>Logout</Text>
-            </Pressable>
+            </TouchableOpacity>
             <Text
               style={{
                 fontSize: 12,
@@ -310,9 +329,9 @@ export function SideMenu({
             >
               All Rights Reserved © {currentYear} ERJ00
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         </Animated.View>
-      </Pressable>
+      </TouchableOpacity>
       <CustomAlert
         visible={alertVisible}
         onClose={() => setAlertVisible(false)}

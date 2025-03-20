@@ -1,21 +1,31 @@
-import { Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useAppContext } from "@/utils/AppContext";
 
 //@ts-ignore
-export function EditButtonDone({ setEditItemVisible }) {
+export function EditButtonDone() {
+  const { setEditMode } = useAppContext();
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => {
-        setEditItemVisible(false);
-      }}
-    >
-      <Text style={styles.text}>✔</Text>
-    </TouchableOpacity>
+    <View style={styles.mainContainer}>
+      <TouchableOpacity
+        style={styles.BbuttonContainer}
+        onPress={() => {
+          setEditMode(false);
+        }}
+      >
+        <Text style={styles.text}>✔</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  BbuttonContainer: {
     backgroundColor: "#000",
     width: 43,
     height: 43,

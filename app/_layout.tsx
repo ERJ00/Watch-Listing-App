@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import storageUtils from "@/utils/storageUtils";
 import { StatusBar } from "expo-status-bar";
 
+import AppProvider from "@/utils/AppContext";
+
 export default function RootLayout() {
   const theme = useCustomTheme();
   const router = useRouter();
@@ -64,7 +66,8 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#000" }}>
+    <AppProvider>
+      <View style={{ flex: 1, backgroundColor: "#000" }}>
       <StatusBar
         backgroundColor="#000"
         barStyle="light-content"
@@ -79,5 +82,7 @@ export default function RootLayout() {
         </Stack>
       </ThemeProvider>
     </View>
+    </AppProvider>
+    
   );
 }

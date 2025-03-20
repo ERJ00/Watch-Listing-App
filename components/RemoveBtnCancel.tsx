@@ -1,7 +1,11 @@
 //@ts-nocheck
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { useAppContext } from "@/utils/AppContext";
 
-export function RemoveBtnCancel({ setRemoveCheckboxVisible }) {
+export function RemoveBtnCancel() {
+  // context
+  const { setRemoveCheckboxVisible } = useAppContext();
+
   return (
     <TouchableOpacity
       onPress={() => {

@@ -12,17 +12,27 @@ import {
 
 import * as Clipboard from "expo-clipboard";
 import Toast from "react-native-toast-message";
+import { ItemInfoModal } from "./ItemInfoModal";
+import { useState } from "react";
+
+import { useAppContext } from "@/utils/AppContext";
 
 export function ItemList({
   item,
   itemIndex,
   checked,
-  removeCheckboxVisible,
   handleCheckboxPress,
-  editItemVisible,
   setEditItem,
   setEditModalVisible,
 }) {
+  // context
+  const {
+    removeCheckboxVisible,
+    editMode,
+    setSelectedItem,
+    setInfoModalVisible,
+  } = useAppContext();
+
   const { title, episode, season, status } = item;
 
   const copyToClipboard = async () => {
@@ -35,11 +45,15 @@ export function ItemList({
   };
 
   return (
-    <View
+    <TouchableOpacity
       style={[
         styles.itemContainer,
         { backgroundColor: checked ? "#870505" : "#000" },
       ]}
+      onPress={() => {
+        setSelectedItem(item);
+        setInfoModalVisible(true);
+      }}
     >
       <View style={{ width: "100%", flexDirection: "row" }}>
         <View style={{ width: "93%" }}>
@@ -71,7 +85,7 @@ export function ItemList({
         <Text style={styles.label}>
           EPISODE: <Text style={styles.text}>{episode}</Text>
         </Text>
-        {!removeCheckboxVisible && !editItemVisible && (
+        {!removeCheckboxVisible && !editMode && (
           <View
             style={[
               styles.statusIndicator,
@@ -88,7 +102,7 @@ export function ItemList({
             {checked && <Text style={{ color: "#fff" }}>✔</Text>}
           </Pressable>
         )}
-        {editItemVisible && (
+        {editMode && (
           <TouchableOpacity
             onPress={() => {
               setEditItem(item);
@@ -104,7 +118,7 @@ export function ItemList({
         STATUS:{" "}
         <Text style={styles.text}>{status ? "Finished" : "Unfinished"}</Text>
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 

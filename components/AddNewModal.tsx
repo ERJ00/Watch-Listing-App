@@ -12,26 +12,28 @@ import {
 import { CustomAlert } from "./CustomAlert";
 import storageUtils from "@/utils/storageUtils";
 
-export function AddNewModal({ visible, onClose }) {
+import { useAppContext } from "@/utils/AppContext";
+
+export function AddNewModal() {
   const [title, setTitle] = useState("");
   const [season, setSeason] = useState("");
   const [episode, setEpisode] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [closeNow, setCloseNow] = useState(false);
   const [isDoneSave, setIsDoneSave] = useState(false);
 
-  useEffect(() => {
-    if (closeNow) {
-      onClose();
-    }
-  }, [closeNow]);
+  const { setReloadData, isAddModalVisible, setAddModalVisible } =
+    useAppContext();
+
+  const closeModal = () => {
+    clearInputs();
+    setAddModalVisible(false);
+  };
 
   const clearInputs = () => {
     setTitle("");
     setSeason("");
     setEpisode("");
-    setCloseNow(false);
     setIsDoneSave(false);
   };
 
@@ -67,14 +69,16 @@ export function AddNewModal({ visible, onClose }) {
     const message = `" ${title} " Successfully added.`;
     setAlertMessage(message);
     setAlertVisible(true);
-    clearInputs();
 
     await storageUtils.addItem(data);
+    console.log("Item added: ", data);
+
     setIsDoneSave(true);
+    setReloadData(true);
   };
 
   return (
-    <Modal visible={visible} transparent={true} animationType="slide">
+    <Modal visible={isAddModalVisible} transparent={true} animationType="slide">
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
           <Text style={styles.title}>ADD NEW ITEM</Text>
@@ -121,7 +125,7 @@ export function AddNewModal({ visible, onClose }) {
             <TouchableOpacity
               onPress={() => {
                 clearInputs();
-                onClose();
+                closeModal();
               }}
               style={styles.cancelBtn}
             >
@@ -139,7 +143,7 @@ export function AddNewModal({ visible, onClose }) {
         onClose={() => {
           setAlertVisible(false);
           if (isDoneSave) {
-            setCloseNow(true);
+            closeModal();
           }
         }}
         message={alertMessage}
@@ -151,7 +155,7 @@ export function AddNewModal({ visible, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
   },

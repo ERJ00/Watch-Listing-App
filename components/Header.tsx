@@ -12,21 +12,18 @@ import { MenuButton } from "./MenuButtonComponent";
 import { SideMenu } from "./SideMenu";
 import { useEffect, useState } from "react";
 import { EditButtonDone } from "./EditButtonDone";
+import { useAppContext } from "@/utils/AppContext";
 
 export function Header({
-  setAddModalVisible,
-  setRemoveCheckboxVisible,
-  setEditItemVisible,
-  editItemVisible,
   // search
   searchQuery,
   setSearchQuery,
   searchResults,
-  onItemPress,
-  reload,
+  // onItemPress,
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [results, setResults] = useState([]);
+  const { editMode, setSelectedItem, setInfoModalVisible } = useAppContext();
 
   useEffect(() => {
     setResults(searchResults);
@@ -34,22 +31,16 @@ export function Header({
 
   return (
     <View style={[styles.headerContainer]}>
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-
-      {editItemVisible ? (
-        <EditButtonDone setEditItemVisible={setEditItemVisible} />
+      {!editMode && (
+        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      )}
+      {editMode ? (
+        <EditButtonDone />
       ) : (
         <MenuButton setModalVisible={setModalVisible} />
       )}
 
-      <SideMenu
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        setAddModalVisible={setAddModalVisible}
-        setRemoveCheckboxVisible={setRemoveCheckboxVisible}
-        setEditItemVisible={setEditItemVisible}
-        reload={reload}
-      />
+      <SideMenu modalVisible={modalVisible} setModalVisible={setModalVisible} />
 
       {searchQuery != "" && (
         <View style={styles.dropdown}>
@@ -59,7 +50,10 @@ export function Header({
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.dropdownItem}
-                onPress={() => onItemPress(item)}
+                onPress={() => {
+                  setSelectedItem(item);
+                  setInfoModalVisible(true);
+                }}
               >
                 <Text style={styles.dropdownText}>{item.title}</Text>
                 <View
