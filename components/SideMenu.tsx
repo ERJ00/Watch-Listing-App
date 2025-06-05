@@ -144,6 +144,7 @@ export function SideMenu({ modalVisible, setModalVisible }) {
           status: item.status,
           episode: item.episode,
           season: item.season,
+          dateModified: item.dateModified,
         });
       });
 

@@ -62,6 +62,12 @@ export function ItemInfoModal({
               {selectedItem?.status ? "finished" : "Unfinished"}
             </Text>
           </Text>
+          <Text style={[styles.label, {fontSize: 12}]}>
+            Date Modified:
+            <Text style={[styles.text, { fontSize: 12 }]}>
+              {" "}{selectedItem?.dateModified}
+            </Text>
+          </Text>
           <View style={styles.btnContainer}>
             <TouchableOpacity
               style={styles.closeButton}

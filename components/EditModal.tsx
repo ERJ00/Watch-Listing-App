@@ -60,13 +60,20 @@ export function EditModal({ visible, item, onClose }) {
     }
 
     if (item) {
+      const date = new Date();
+      const currentDateTime = date.toLocaleString("en-US", {
+        timeZone: "Asia/Manila",
+      });
+
       const updatedItem = {
         ...item,
         title: itemTitle || item.title,
         season: itemSeason || item.season,
         episode: itemEpisode || item.episode,
         status: itemStatus ?? item.status,
+        dateModified: currentDateTime,
       };
+
       await storageUtils.updateItem(updatedItem);
       // setAlertMessage("Data updated successfully.");
       // setAlertVisible(true);

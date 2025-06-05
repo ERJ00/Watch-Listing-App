@@ -59,11 +59,17 @@ export function AddNewModal() {
       return;
     }
 
+    const date = new Date();
+    const currentDateTime = date.toLocaleString("en-US", {
+      timeZone: "Asia/Manila",
+    });
+
     const data = {
       title,
       season: parseInt(season),
       episode: parseInt(episode),
       status: false,
+      dateModified: currentDateTime,
     };
 
     const message = `" ${title} " Successfully added.`;
@@ -71,7 +77,6 @@ export function AddNewModal() {
     setAlertVisible(true);
 
     await storageUtils.addItem(data);
-    console.log("Item added: ", data);
 
     setIsDoneSave(true);
     setReloadData(true);
