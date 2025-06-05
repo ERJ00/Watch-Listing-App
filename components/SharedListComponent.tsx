@@ -210,16 +210,15 @@ export const SharedListComponent = ({ filterFn }) => {
         onClose={() => setAlertVisible(false)}
         message={alertMessage}
       />
-      {infoModalVisible && (
-        <ItemInfoModal
-          visible={infoModalVisible}
-          transparent
-          animationType="slide"
-          selectedItem={selectedItem}
-          onRequestClose={() => setInfoModalVisible(false)}
-          reload={() => setReloadData(true)}
-        />
-      )}
+
+      <ItemInfoModal
+        visible={infoModalVisible}
+        animationType="slide"
+        selectedItem={selectedItem}
+        onRequestClose={() => setInfoModalVisible(false)}
+        reload={() => setReloadData(true)}
+      />
+
       <LoadingModal visible={loading} />
       <Toast config={toastConfig} />
 

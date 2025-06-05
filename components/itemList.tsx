@@ -12,7 +12,6 @@ import {
 
 import * as Clipboard from "expo-clipboard";
 import Toast from "react-native-toast-message";
-import { ItemInfoModal } from "./ItemInfoModal";
 import { useState } from "react";
 
 import { useAppContext } from "@/utils/AppContext";
