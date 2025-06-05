@@ -61,9 +61,14 @@ export function EditModal({ visible, item, onClose }) {
 
     if (item) {
       const date = new Date();
-      const currentDateTime = date.toLocaleString("en-US", {
-        timeZone: "Asia/Manila",
-      });
+      // Get time in Manila by adjusting offset (UTC+8)
+      const manilaOffset = 8 * 60; // 8 hours in minutes
+      const localOffset = date.getTimezoneOffset(); // in minutes
+
+      const totalOffset = (manilaOffset + localOffset) * 60 * 1000; // ms
+
+      const manilaDate = new Date(date.getTime() + totalOffset);
+      const currentDateTime = manilaDate.toISOString(); // ✅ reliable
 
       const updatedItem = {
         ...item,

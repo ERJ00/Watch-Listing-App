@@ -9,6 +9,7 @@ const AppProvider = ({ children }) => {
   const [editMode, setEditMode] = useState(false);
   const [selectedItem, setSelectedItem] = useState([]);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [sortMode, setSortMode] = useState("alphabetical");
 
   return (
     <AppContext.Provider
@@ -25,6 +26,8 @@ const AppProvider = ({ children }) => {
         setSelectedItem,
         infoModalVisible,
         setInfoModalVisible,
+        sortMode,
+        setSortMode,
       }}
     >
       {children}

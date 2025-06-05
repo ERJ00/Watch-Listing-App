@@ -27,6 +27,13 @@ export function ItemInfoModal({
     await Clipboard.setStringAsync(selectedItem?.title);
   };
 
+  const formatedDate = new Date(selectedItem?.dateModified).toLocaleString(
+    "en-PH",
+    {
+      timeZone: "Asia/Manila",
+    }
+  );
+
   return (
     <Modal
       visible={visible}
@@ -62,11 +69,9 @@ export function ItemInfoModal({
               {selectedItem?.status ? "finished" : "Unfinished"}
             </Text>
           </Text>
-          <Text style={[styles.label, {fontSize: 12}]}>
+          <Text style={[styles.label, { fontSize: 12 }]}>
             Date Modified:
-            <Text style={[styles.text, { fontSize: 12 }]}>
-              {" "}{selectedItem?.dateModified}
-            </Text>
+            <Text style={[styles.text, { fontSize: 12 }]}> {formatedDate}</Text>
           </Text>
           <View style={styles.btnContainer}>
             <TouchableOpacity

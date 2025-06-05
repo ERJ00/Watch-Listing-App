@@ -24,6 +24,7 @@ import { toastConfig } from "../hooks/toastConfig";
 import storageUtils from "@/utils/storageUtils";
 
 import { useAppContext } from "@/utils/AppContext";
+import FloatingSortSelector from "./FloatingSortSelector";
 
 export const SharedListComponent = ({ filterFn }) => {
   const [data, setData] = useState([]);
@@ -48,6 +49,8 @@ export const SharedListComponent = ({ filterFn }) => {
     infoModalVisible,
     setInfoModalVisible,
     selectedItem,
+    sortMode,
+    setSortMode,
   } = useAppContext();
 
   // Load data from local storage
@@ -55,17 +58,31 @@ export const SharedListComponent = ({ filterFn }) => {
     const storedData = await storageUtils.getAllItems();
     if (storedData) {
       const filteredData = filterFn ? storedData.filter(filterFn) : storedData;
-      const sortedData = filteredData.sort((a, b) =>
-        a.title.localeCompare(b.title)
-      );
+      let sortedData = [...filteredData];
+      switch (sortMode) {
+        case "alphabetical":
+          sortedData.sort((a, b) => a.title.localeCompare(b.title));
+          break;
+        case "lastModified":
+          sortedData.sort(
+            (a, b) =>
+              new Date(b.dateModified).getTime() -
+              new Date(a.dateModified).getTime()
+          );
+          break;
+        default:
+          break;
+      }
       setData(sortedData);
       setReloadData(false);
     }
-  }, [filterFn]);
+  }, [filterFn, sortMode]);
 
   // Reload data when necessary
   useEffect(() => {
-    if (reloadData) loadData();
+    if (reloadData) {
+      loadData();
+    }
   }, [reloadData, loadData]);
 
   // Reload data when screen gains focus
@@ -127,6 +144,26 @@ export const SharedListComponent = ({ filterFn }) => {
     }
   }, [searchQuery, data]);
 
+  const handleSortChange = (sortmode) => {
+    setSortMode(sortmode);
+    let sortedData = [...data];
+    switch (sortmode) {
+      case "alphabetical":
+        sortedData.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "lastModified":
+        sortedData.sort(
+          (a, b) =>
+            new Date(b.dateModified).getTime() -
+            new Date(a.dateModified).getTime()
+        );
+        break;
+      default:
+        return;
+    }
+    setData(sortedData);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Background>
@@ -185,6 +222,8 @@ export const SharedListComponent = ({ filterFn }) => {
       )}
       <LoadingModal visible={loading} />
       <Toast config={toastConfig} />
+
+      <FloatingSortSelector onSortChange={handleSortChange} />
     </SafeAreaView>
   );
 };
